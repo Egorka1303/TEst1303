@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SamPetro-Solutions — Разработка сайтов и ремонт техники нового поколения</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Three.js для 3D графики -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #050508;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00f0ff;
+            --accent-purple: #7928ca;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta+ Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 3D Canvas на фоне */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Навигация */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: rgba(5, 5, 8, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .cta-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        /* Главный экран (Hero) */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 8%;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Секция услуг */
+        .services {
+            padding: 100px 8%;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Футер */
+        footer {
+            padding: 50px 8%;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Фон через Three.js -->
+    <div id="canvas-container"></div>
+
+    <!-- Шапка -->
+    <header>
+        <div class="logo">SamPetro-Solutions</div>
+        <ul class="nav-links">
+            <li><a href="#services">Услуги</a></li>
+            <li><a href="#about">О нас</a></li>
+            <li><a href="#contact">Контакты</a></li>
+        </ul>
+        <button class="cta-btn" onclick="alert('Свяжитесь с нами в Telegram/WhatsApp!')">Оставить заявку</button>
+    </header>
+
+    <!-- Главный экран -->
+    <section class="hero">
+        <h1>Инженерное превосходство <span>и digital-дизайн</span></h1>
+        <p>Мы создаем высоконагруженные сайты и экосистемы, а также возвращаем к жизни сложную электронику: от мощных ПК и ноутбуков до игровых консолей нового поколения.</p>
+        <button class="cta-btn" style="padding: 15px 35px; font-size: 1.1rem;">Начать проект</button>
+    </section>
+
+    <!-- Услуги -->
+    <section class="services" id="services">
+        <h2 class="section-title">Наши компетенции</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>🌐 Web-Разработка</h3>
+                <p>Создание премиальных сайтов, интернет-магазинов и веб-приложений с уникальным интерактивным дизайном и безупречной производительностью.</p>
+            </div>
+            <div class="card">
+                <h3>💻 Ремонт Ноутбуков и ПК</h3>
+                <p>Глубокая аппаратная диагностика, пайка любой сложности, чистка с заменой топовых термоинтерфейсов и апгрейд железа.</p>
+            </div>
+            <div class="card">
+                <h3>🎮 Игровые Приставки</h3>
+                <p>Профессиональный ремонт и обслуживание PlayStation, Xbox, Nintendo Switch, устранение перегрева и ремонт системных плат.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 SamPetro-Solutions. Все права защищены.</p>
+    </footer>
+
+    <!-- Скрипт для интерактивного 3D-фону -->
+    <script>
+        // Инициализация Three.js сцены
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Создаем футуристический геометрический 3D-объект (торальный узел / кристалл)
+        const geometry = new THREE.IcosahedronGeometry(2, 0);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x00f0ff,
+            wireframe: true,
+            roughness: 0.2,
+            metalness: 0.8
+        });
+        const icosahedron = new THREE.Mesh(geometry, material);
+        scene.add(icosahedron);
+
+        // Добавляем плавающие частицы (цифровой шум/техно-пыль)
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 700;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.025,
+            color: 0x7928ca
+        });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // Освещение
+        const pointLight = new THREE.PointLight(0x00f0ff, 3, 50);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        camera.position.z = 6;
+
+        // Интерактив: вращение от движения мыши
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) - 0.5;
+            mouseY = (event.clientY / window.innerHeight) - 0.5;
+        });
+
+        // Анимационный цикл
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Плавное вращение 3D-объекта
+            icosahedron.rotation.x = elapsedTime * 0.2 + mouseY * 0.5;
+            icosahedron.rotation.y = elapsedTime * 0.3 + mouseX * 0.5;
+
+            // Вращение частиц
+            particlesMesh.rotation.y = elapsedTime * 0.05;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Адаптивность при изменении размера окна
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
